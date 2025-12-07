@@ -8,15 +8,18 @@ from ui.screen_manager import ScreenManager
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 480
 
+#initialize Pygame
 def main():
     pygame.init()
-    pygame.display.set_caption("RaceDash")
 
     #create window
+    pygame.display.set_caption("RaceDash")
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    clock = pygame.time.Clock()
+    
+    clock = pygame.time.Clock()            #initialize clock for fps control
     screen_manager = ScreenManager(screen) #handle all drawing
 
+    #main loop
     running = True
 
     while running:
@@ -29,11 +32,12 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     running = False
 
-    #drawing
-    screen_manager.draw()
-    pygame.display.flip()
-    clock.tick(30)        #limit to 30 FPS
+        #drawing
+        screen_manager.draw() #delegate draw to UI system
+        pygame.display.flip() #updates window
+        clock.tick(30)        #limit to 30 FPS
 
+    #cleanup - safely exit
     pygame.quit()
     sys.exit()
 
