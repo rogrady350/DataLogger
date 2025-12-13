@@ -3,6 +3,7 @@ import pygame
 import sys
 
 from ui.screen_manager import ScreenManager
+from data.test_data_source import TestDataSource
 
 #screen dimensions
 SCREEN_WIDTH = 800
@@ -12,12 +13,14 @@ SCREEN_HEIGHT = 480
 def main():
     pygame.init()
 
+    data_source = TestDataSource()  #simulated test data source for now
+
     #create window
     pygame.display.set_caption("RaceDash")
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     
     clock = pygame.time.Clock()            #initialize clock for fps control
-    screen_manager = ScreenManager(screen) #handle all drawing
+    screen_manager = ScreenManager(screen, data_source) #handle all drawing
 
     #main loop
     running = True
