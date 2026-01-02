@@ -16,6 +16,7 @@ class ScreenManager:
         #constants
         screen_width = self.screen.get_width()
         screen_height = self.screen.get_height()
+        HEADER_HEIGHT = 40
 
         readings = self.data_source.get_readings() #get current sensor readings (using test data source for now)
         value, unit, label = readings["oil_temp"]  #example: get oil temp reading for testing
@@ -36,7 +37,15 @@ class ScreenManager:
         self.screen.blit(title_text, text_rect)
 
         #gauge rects
-        gauge_rects = get_layout_rects(screen_width, screen_height, count=1) #test with 1 gauge
+        gauge_rects = get_layout_rects(
+            screen_width, 
+            screen_height - HEADER_HEIGHT, 
+            count=1 #test with 1 gauge
+        )
+        
+        #shift gagues below header
+        for rect in gauge_rects:
+            rect.top += HEADER_HEIGHT
 
         #render gauge
         draw_gauge_box(
