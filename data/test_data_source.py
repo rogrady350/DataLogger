@@ -20,7 +20,7 @@ class TestDataSource:
 
         return {
             "oil_temp":  (oil_temp, "°F", "Oil Temp"),
-            "trans_pan": (trans_pan, "°F", "Trans Pan"),
+            "trans_post": (trans_pan, "°F", "Trans Post"),
             "trans_out": (trans_out, "°F", "Trans Out"),
             "fuel_psi":  (fuel_psi, "PSI", "Fuel PSI")
         }

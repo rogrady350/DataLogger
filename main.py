@@ -31,9 +31,15 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             
+            #esc key exits
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+
+            #tap/click handling
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: #left click/tap
+                    screen_manager.on_tap(event.pos)
 
         #drawing
         screen_manager.draw() #delegate draw to UI system
