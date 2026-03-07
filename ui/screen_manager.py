@@ -6,10 +6,19 @@ import os
 
 class ScreenManager:
     def __init__(self, screen, data_source):
+        self.header_height = 40 #constant for header height
         self.screen = screen
         self.data_source = data_source
         self.settings_path = os.path.join(os.path.dirname(__file__), '..', 'settings.json')
         self.gauge_count = 1 #default 1 gauge if no saved settings
+
+        #default gauge config
+        self.selected_sensors = [
+            "nitrous_psi",
+            "trans_in",
+            "trans_out",
+            "fuel_psi"
+        ]
 
         self._load_settings()
 
@@ -30,23 +39,25 @@ class ScreenManager:
         elif self.btn4.collidepoint(pos):
             self.gauge_count = 4
 
+        #handle gauge taps - runs when tap is not on a header (layout) button
+        else:
+            gauge_rects = self._get_gauge_rects() #load gauge geometry via helper function
+
+            #check if tap is within gauge box
+            for i, rect in enumerate(gauge_rects):
+                if rect.collidepoint(pos):
+                    print("Gauge tapped:", i)
+
+                    
+
         self._save_settings()
 
     def draw(self):
-        #constants
-        screen_width = self.screen.get_width()
-        screen_height = self.screen.get_height()
-        HEADER_HEIGHT = 40
-
         readings = self.data_source.get_readings() #get current sensor readings (using test data source for now)
-
-        #fill screen with dark gray
-        self.screen.fill((30, 30, 30))
+        self.screen.fill((30, 30, 30))             #fill screen with dark gray
 
         #render title text
-        title_text = self.title_font.render(
-            "RaceDash", True, (200, 200, 200)
-        )
+        title_text = self.title_font.render("RaceDash", True, (200, 200, 200))
 
         #title text top center
         text_rect = title_text.get_rect()
@@ -69,18 +80,8 @@ class ScreenManager:
         _draw_btn(self.btn2, "2", self.gauge_count == 2)
         _draw_btn(self.btn4, "4", self.gauge_count == 4)
 
-        sensor_keys = ["oil_temp", "trans_out", "trans_post", "fuel_psi"] #simple default order for now
-
-        #gauge rects
-        gauge_rects = get_layout_rects(
-            screen_width, 
-            screen_height - HEADER_HEIGHT, 
-            count=self.gauge_count
-        )
-        
-        #shift gagues below header
-        for rect in gauge_rects:
-            rect.top += HEADER_HEIGHT
+        sensor_keys = self.selected_sensors   #render sensor config from screen_manager settings
+        gauge_rects = self._get_gauge_rects() #load gauge geometry via helper function
 
         #render gauges
         """
@@ -97,12 +98,31 @@ class ScreenManager:
                 unit=unit
             )
 
+    #==HELPERS==
+    #gauge geometry helper
+    def _get_gauge_rects(self):
+        #get screen dimensions
+        screen_width = self.screen.get_width()
+        screen_height = self.screen.get_height()
+
+        #build gauge layout
+        gauge_rects = get_layout_rects(
+            screen_width, 
+            screen_height - self.header_height,
+            count=self.gauge_count
+        )
+
+        #move gauges below header
+        for rect in gauge_rects:
+            rect.top += self.header_height
+        return gauge_rects
+
     #load/save settings helpers
     def _load_settings(self):
         try:
             with open(self.settings_path, 'r') as f:
                 data = json.load(f)
-            self.gauge_count = int(data.get('gauge_count', self))
+            self.gauge_count = int(data.get('gauge_count', self.gauge_count))
             #self.selected_sensors = data.get('selected_sensors', self.selected_sensors)
 
         except FileNotFoundError:

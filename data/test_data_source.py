@@ -13,14 +13,14 @@ class TestDataSource:
     def get_readings(self):
         t = time.time() - self.start_time
 
-        oil_temp  = 200 + 10 * math.sin(t * 0.2)
-        trans_pan = 180 + 15 * math.sin(t * 0.15 + 1.0)
+        nitrous_psi = 1000 + 200 * math.sin(t * 0.2)
+        trans_in = 180 + 15 * math.sin(t * 0.15 + 1.0)
         trans_out = 210 + 20 * math.sin(t * 0.12 + 2.0)
         fuel_psi  = 55 + 5 * math.sin(t * 0.25 + 0.5)
 
         return {
-            "oil_temp":  (oil_temp, "°F", "Oil Temp"),
-            "trans_post": (trans_pan, "°F", "Trans Post"),
+            "nitrous_psi": (nitrous_psi, "PSI", "Nitrous PSI"),
+            "trans_in": (trans_in, "°F", "Trans In"),
             "trans_out": (trans_out, "°F", "Trans Out"),
             "fuel_psi":  (fuel_psi, "PSI", "Fuel PSI")
         }
