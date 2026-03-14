@@ -6,6 +6,7 @@ import os
 
 class ScreenManager:
     def __init__(self, screen, data_source):
+        #main screen config
         self.header_height = 40 #constant for header height
         self.screen = screen
         self.data_source = data_source
@@ -20,6 +21,10 @@ class ScreenManager:
             "fuel_psi"
         ]
 
+        #sensor selection config
+        self.active_gauge_index = None  #holds index of gauge being configured for sensor selection
+        self.show_sensor_picker = False #show/hide sensor picker selector
+
         self._load_settings()
 
         #fonts
@@ -32,23 +37,7 @@ class ScreenManager:
         self.btn4 = pygame.Rect(160, 8, 60, 34)
 
     def on_tap(self, pos):
-        if self.btn1.collidepoint(pos):
-            self.gauge_count = 1
-        elif self.btn2.collidepoint(pos):
-            self.gauge_count = 2
-        elif self.btn4.collidepoint(pos):
-            self.gauge_count = 4
-
-        #handle gauge taps - runs when tap is not on a header (layout) button
-        else:
-            gauge_rects = self._get_gauge_rects() #load gauge geometry via helper function
-
-            #check if tap is within gauge box
-            for i, rect in enumerate(gauge_rects):
-                if rect.collidepoint(pos):
-                    print("Gauge tapped:", i)
-
-                    
+        
 
         self._save_settings()
 
@@ -98,8 +87,9 @@ class ScreenManager:
                 unit=unit
             )
 
-    #==HELPERS==
-    #gauge geometry helper
+    #===HELPERS===
+    #=Geometry Helpers=
+    #gauge geometry
     def _get_gauge_rects(self):
         #get screen dimensions
         screen_width = self.screen.get_width()
@@ -116,8 +106,53 @@ class ScreenManager:
         for rect in gauge_rects:
             rect.top += self.header_height
         return gauge_rects
+    
+    #sensor picker geometry
+    def _get_sensor_picker_rects(self):
+        box_width = 260
+        box_height = 50
+        gap = 12
 
-    #load/save settings helpers
+        total_height = len(self.available_sensors) * box_height + (len(self.available_sensors) - 1) * gap
+        start_x = (self.screen.get_width() - box_width) // 2
+        start_y = (self.screen.get_height() - total_height) // 2
+
+        rects = []
+        for i in range(len(self.available_sensors)):
+            y = start_y + i * (box_height + gap)
+            rects.append(pygame.Rect(start_x, y, box_width, box_height))
+
+        return rects
+        
+    #=Tap Handling Helpers=
+    #dash taps - either change num of gauges displayed or show sensor picker
+    def _handle_dash_tap(self, pos):
+        #select number of gauges displayed
+        if self.btn1.collidepoint(pos):
+            self.gauge_count = 1
+        elif self.btn2.collidepoint(pos):
+            self.gauge_count = 2
+        elif self.btn4.collidepoint(pos):
+            self.gauge_count = 4
+
+        #gauge sensor selection
+        else:
+            gauge_rects = self._get_gauge_rects() #load gauge geometry via helper function
+
+            #show sensor picker on tap
+            for i, rect in enumerate(gauge_rects):
+                if rect.collidepoint(pos):
+                    self.active_gauge_index = i
+                    self.show_sensor_picker = True
+                    break
+
+    #sensor selection
+    def _handle_sensor_selection(self, pos):
+        picker_rects = self._get_sensor_picker_rects()
+
+        for i, rect in enumerate(picker_rects):
+
+    #=Load/Save Helpers=
     def _load_settings(self):
         try:
             with open(self.settings_path, 'r') as f:

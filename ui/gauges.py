@@ -60,8 +60,8 @@ def draw_gauge_box(screen, rect, label, value_text, unit):
     #colors
     background_color = (40, 40, 40)
     border_color = (100, 100, 100)
-    label_color = (180, 180, 255)
-    value_color = (0,255, 140)
+    label_color = (255, 255, 255)
+    value_color = (255, 60, 60) #sensor reading value
     unit_color = (200, 200, 200)
 
     #draw background/border
