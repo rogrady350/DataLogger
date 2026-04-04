@@ -11,9 +11,9 @@ class ScreenManager:
         self.screen = screen
         self.data_source = data_source
         self.settings_path = os.path.join(os.path.dirname(__file__), '..', 'settings.json')
-        self.gauge_count = 1 #default 1 gauge if no saved settings
+        self.gauge_count = 1 #number of gaugess displayed. default=1 gauge if no saved settings
 
-        #default gauge config
+        #holds sensor assignments - default config
         self.selected_sensors = [
             "nitrous_psi",
             "trans_in",
@@ -21,9 +21,21 @@ class ScreenManager:
             "fuel_psi"
         ]
 
+        #list of sensors to select from the sensor picker
+        """
+        Default list. Always contains values for max gauge count.
+        draw() will only render first 'gauge_count' sensors from user selection.
+        """
+        self.available_sensors = [
+            "nitrous_psi",
+            "trans_in",
+            "trans_out",
+            "fuel_psi"
+        ]
+
         #sensor selection config
-        self.active_gauge_index = None  #holds index of gauge being configured for sensor selection
-        self.show_sensor_picker = False #show/hide sensor picker selector
+        self.show_sensor_picker = False #bool - show/hide sensor picker selector True=open, False=close
+        self.active_gauge_index = None  #int - holds index of gauge being configured. None if no active selection
 
         self._load_settings()
 
@@ -36,11 +48,15 @@ class ScreenManager:
         self.btn2 = pygame.Rect(90, 8, 60, 34)
         self.btn4 = pygame.Rect(160, 8, 60, 34)
 
+    #master tap handling
     def on_tap(self, pos):
-        
+        if self.show_sensor_picker:
+            self._handle_sensor_selection(pos)
+        else:
+            self._handle_dash_tap(pos)
+        #save is within helpers
 
-        self._save_settings()
-
+    #==Rendering==
     def draw(self):
         readings = self.data_source.get_readings() #get current sensor readings (using test data source for now)
         self.screen.fill((30, 30, 30))             #fill screen with dark gray
@@ -72,7 +88,7 @@ class ScreenManager:
         sensor_keys = self.selected_sensors   #render sensor config from screen_manager settings
         gauge_rects = self._get_gauge_rects() #load gauge geometry via helper function
 
-        #render gauges
+        #render gauges - render first so gauges appear behind sensor picker if open
         """
         rect: current gauge being drawn for key: sensor assigned to that gauge box
         gauge_rects: list of all gauge boxes
@@ -86,6 +102,21 @@ class ScreenManager:
                 value_text=f"{value:.1f}", #format float to 1 decimal place. may change later to vary based on input selection
                 unit=unit
             )
+
+        #render gauge picker if active - render second so it appears on top of gauges when openn
+        if self.show_sensor_picker:
+            self._draw_sensor_picker()
+
+    #helper for rendering sensor picker
+    def _draw_sensor_picker(self):
+        picker_rects = self._get_sensor_picker_rects()
+
+        for rect, sensor in zip(picker_rects, self.available_sensors):
+            pygame.draw.rect(self.screen, (60, 60, 60), rect, border_radius=10)
+            pygame.draw.rect(self.screen, (180, 180, 180), rect, 2, border_radius=10)
+
+            text = self.btn_font.render(sensor, True, (255, 255, 255))
+            self.screen.blit(text, text.get_rect(center=rect.center))
 
     #===HELPERS===
     #=Geometry Helpers=
@@ -130,10 +161,13 @@ class ScreenManager:
         #select number of gauges displayed
         if self.btn1.collidepoint(pos):
             self.gauge_count = 1
+            self._save_settings()
         elif self.btn2.collidepoint(pos):
             self.gauge_count = 2
+            self._save_settings()
         elif self.btn4.collidepoint(pos):
             self.gauge_count = 4
+            self._save_settings()
 
         #gauge sensor selection
         else:
@@ -151,6 +185,18 @@ class ScreenManager:
         picker_rects = self._get_sensor_picker_rects()
 
         for i, rect in enumerate(picker_rects):
+            #tap within sensor picker to select sensor
+            if rect.collidepoint(pos):
+                chosen_sensor = self.available_sensors[i]
+                self.selected_sensors[self.active_gauge_index] = chosen_sensor
+                self.show_sensor_picker = False
+                self.active_gauge_index = None
+                self._save_settings()
+                return
+            
+        #tap outside picker to exit without changes
+        self.show_sensor_picker = False
+        self.active_gauge_index = None
 
     #=Load/Save Helpers=
     def _load_settings(self):
@@ -158,7 +204,14 @@ class ScreenManager:
             with open(self.settings_path, 'r') as f:
                 data = json.load(f)
             self.gauge_count = int(data.get('gauge_count', self.gauge_count))
-            #self.selected_sensors = data.get('selected_sensors', self.selected_sensors)
+            
+            load_sensors = data.get('selected_sensors', self.selected_sensors)
+
+            #safety: only load sensor config if it matches the max available gauge slots
+            if isinstance(load_sensors, list) and len(load_sensors) == len(self.selected_sensors):
+                self.selected_sensors = load_sensors
+            else:
+                print("Invalid sensor config in settings. Using defaults.")
 
         except FileNotFoundError:
             print("Settings file not found. Using default settings.")
@@ -170,7 +223,7 @@ class ScreenManager:
     def _save_settings(self):
         data = {
             'gauge_count': self.gauge_count,
-            #'selected_sensors': self.selected_sensors
+            'selected_sensors': self.selected_sensors
         }
         try:
             with open(self.settings_path, 'w') as f:
