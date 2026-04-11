@@ -19,7 +19,7 @@ def main():
     pygame.display.set_caption("RaceDash")
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     
-    clock = pygame.time.Clock()            #initialize clock for fps control
+    clock = pygame.time.Clock()           #initialize clock for fps control
     screen_manager = ScreenManager(screen, data_source) #handle all drawing
 
     #main loop

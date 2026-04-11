@@ -105,17 +105,19 @@ class ScreenManager:
 
         #render gauge picker if active - render second so it appears on top of gauges when openn
         if self.show_sensor_picker:
-            self._draw_sensor_picker()
+            self._draw_sensor_picker(readings)
 
     #helper for rendering sensor picker
-    def _draw_sensor_picker(self):
+    def _draw_sensor_picker(self, readings):
         picker_rects = self._get_sensor_picker_rects()
 
         for rect, sensor in zip(picker_rects, self.available_sensors):
+            label = readings[sensor][2] #label is index 2 in readings tuple (value, unit, label)
+
             pygame.draw.rect(self.screen, (60, 60, 60), rect, border_radius=10)
             pygame.draw.rect(self.screen, (180, 180, 180), rect, 2, border_radius=10)
 
-            text = self.btn_font.render(sensor, True, (255, 255, 255))
+            text = self.btn_font.render(label, True, (255, 255, 255))
             self.screen.blit(text, text.get_rect(center=rect.center))
 
     #===HELPERS===
