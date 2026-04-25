@@ -9,8 +9,8 @@ class ADSReader:
     Initializes the ADS1115 and sets up the channels for reading voltage inputs.
     """
     def __init__(self):
-        ic2 = busio.I2C(board.SCL, board.SDA)
-        self.ads = ADS.ADS1115(ic2)
+        i2c = busio.I2C(board.SCL, board.SDA)
+        self.ads = ADS.ADS1115(i2c)
 
         self.channels = {
             'channel_0': AnalogIn(self.ads, ADS.P0),

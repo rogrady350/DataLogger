@@ -1,1 +1,1 @@
-{"gauge_count": 4, "selected_sensors": ["nitrous_psi", "fuel_psi", "trans_in", "trans_out"]}
+{"gauge_count": 1, "selected_sensors": ["fuel_psi", "fuel_psi", "trans_in", "trans_out"]}
