@@ -15,7 +15,7 @@ class ScreenManager:
 
         #holds sensor assignments - default config
         self.selected_sensors = [
-            "nitrous_psi",
+            "ebp_psi",
             "trans_in",
             "trans_out",
             "fuel_psi"
@@ -27,7 +27,8 @@ class ScreenManager:
         draw() will only render first 'gauge_count' sensors from user selection.
         """
         self.available_sensors = [
-            "nitrous_psi",
+            "n2o_psi",
+            "ebp_psi",
             "trans_in",
             "trans_out",
             "fuel_psi"
