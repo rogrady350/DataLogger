@@ -1,3 +1,4 @@
 pygame==2.6.1
 adafruit-blinka
 adafruit-circuitpython-ads1x15
+gpiozero
